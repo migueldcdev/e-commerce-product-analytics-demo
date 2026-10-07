@@ -17,13 +17,15 @@ describe('routes', () => {
     renderAt('/');
     const headings = screen.getAllByRole('heading', { level: 1 });
     expect(headings).toHaveLength(1);
-    expect(headings[0]).toHaveAccessibleName(/posthog demo shop/i);
+    expect(headings[0]).toHaveAccessibleName(/e-commerce product analytics demo/i);
     expect(screen.queryByText(/page not found/i)).not.toBeInTheDocument();
   });
 
   it('renders Not Found for an unknown path', () => {
     renderAt('/missing');
-    expect(screen.getByRole('heading', { level: 1, name: /posthog demo shop/i })).toBeVisible();
+    expect(
+      screen.getByRole('heading', { level: 1, name: /e-commerce product analytics demo/i }),
+    ).toBeVisible();
     expect(screen.getByText(/page not found/i)).toBeVisible();
   });
 });
