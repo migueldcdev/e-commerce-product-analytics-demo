@@ -63,12 +63,14 @@ Without `VITE_POSTHOG_KEY` the app logs one warning and skips analytics.
 .mcp.json                      # shadcn MCP server for coding agents
 e2e/                           # Playwright tests (*.desktop / *.mobile run on one project)
   browse*.spec.ts              # browse page: search, filters, sort, URL, states, cart, a11y
+  welcome.spec.ts              # demo welcome screen; other specs skip it via support/welcome.ts
 public/
   assets/                      # record covers
   data/records.json            # the 25-record demo catalog, fetched at runtime
 src/
   catalog/                     # record types, search/filter/sort + URL params (pure)
   shop/                        # browse page UI: header search, filters, card, cart panel
+  welcome/                     # "This is a demo" dialog, once per session (sessionStorage)
   components/ui/               # shadcn components (generated, committed)
   context/                     # React contexts — one Provider + hook per file
     DemoSettingsContext.tsx    # persona, device, flag overrides
