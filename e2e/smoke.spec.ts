@@ -1,4 +1,10 @@
 import { expect, test, type Page } from '@playwright/test';
+import { stubPostHog } from './support/posthog.ts';
+
+// The build has a stub PostHog key; keep its requests off the network.
+test.beforeEach(async ({ page }) => {
+  await stubPostHog(page);
+});
 
 function collectConsoleErrors(page: Page): string[] {
   const errors: string[] = [];
