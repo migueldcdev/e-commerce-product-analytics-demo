@@ -178,6 +178,41 @@ test.describe('expanding a row', () => {
   });
 });
 
+test.describe('help tooltip', () => {
+  const tooltip = (page: Page) => page.locator('[data-slot="tooltip-content"]');
+
+  test('the $pageview row explains itself, on hover or tap', async ({ page, isMobile }) => {
+    await openConsole(page, isMobile);
+    const help = pageviewRow(page, isMobile).getByRole('button', { name: 'About $pageview' });
+    await expect(help).toBeVisible();
+
+    if (isMobile) await help.tap();
+    else await help.hover();
+
+    await expect(tooltip(page)).toBeVisible();
+    await expect(tooltip(page)).toContainText(
+      'Pageview: Fires on each page load or route change, recording URL, referrer, browser and device.',
+    );
+    await expect(rowHeader(pageviewRow(page, isMobile))).toHaveAttribute('aria-expanded', 'false');
+
+    if (isMobile) {
+      await help.tap();
+      await expect(tooltip(page)).toBeHidden();
+    }
+  });
+
+  test('the $autocapture row has no ? button', async ({ page, isMobile }) => {
+    const button = await addAppButton(page, 'No help here');
+    if (isMobile) await button.tap();
+    else await button.click();
+    await openConsole(page, isMobile);
+
+    const row = consoleRows(page, isMobile).filter({ hasText: /"No help here"/ });
+    await expect(row).toHaveCount(1);
+    await expect(row.getByRole('button', { name: /^about/i })).toHaveCount(0);
+  });
+});
+
 test.describe('scrolling', () => {
   // Generating entries needs clicks in the app while the list is visible, which the
   // full-screen mobile console covers. The scroll logic itself is shared and unit tested.
@@ -190,7 +225,7 @@ test.describe('scrolling', () => {
       const row = rows.find((r) => r.getBoundingClientRect().bottom > top + 1);
       if (!row) return null;
       return {
-        text: row.querySelector('button, [role]')?.textContent ?? row.textContent,
+        text: row.querySelector('button[aria-expanded]')?.textContent ?? row.textContent,
         offset: Math.round(row.getBoundingClientRect().top - top),
       };
     });
@@ -243,6 +278,15 @@ test.describe('accessibility', () => {
   test('passes axe with the console open and entries', async ({ page, isMobile }) => {
     await openConsole(page, isMobile);
     await expect(pageviewRow(page, isMobile)).toHaveCount(1);
+
+    await expectNoAxeViolations(page);
+  });
+
+  test('passes axe with a help tooltip shown', async ({ page, isMobile }) => {
+    await openConsole(page, isMobile);
+    const help = pageviewRow(page, isMobile).getByRole('button', { name: 'About $pageview' });
+    await help.click();
+    await expect(page.locator('[data-slot="tooltip-content"]')).toBeVisible();
 
     await expectNoAxeViolations(page);
   });
