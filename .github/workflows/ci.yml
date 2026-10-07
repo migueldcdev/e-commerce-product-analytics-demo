@@ -70,7 +70,7 @@ jobs:
       - name: Install Playwright system deps
         if: steps.pw-cache.outputs.cache-hit == 'true'
         run: npx playwright install-deps chromium
-      - run: npm run build
+      # Playwright's webServer builds with a stub PostHog key, then serves the preview.
       - run: npm run test:e2e
       - uses: actions/upload-artifact@v4
         if: failure()
