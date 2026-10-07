@@ -15,13 +15,13 @@ function collectConsoleErrors(page: Page): string[] {
   return errors;
 }
 
-test('home shows the project name without console errors', async ({ page }) => {
+test('home shows the store and its records without console errors', async ({ page }) => {
   const errors = collectConsoleErrors(page);
   await page.goto('/');
 
-  await expect(
-    page.getByRole('heading', { level: 1, name: /e-commerce product analytics demo/i }),
-  ).toBeVisible();
+  await expect(page.getByRole('link', { name: /side a records, home/i })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Records' })).toBeVisible();
+  await expect(page.getByRole('list', { name: 'Records' }).getByRole('article')).not.toHaveCount(0);
   expect(errors).toEqual([]);
 });
 
@@ -29,9 +29,7 @@ test('a deep link to an unknown path shows Not Found', async ({ page }) => {
   const errors = collectConsoleErrors(page);
   await page.goto('/missing');
 
-  await expect(
-    page.getByRole('heading', { level: 1, name: /e-commerce product analytics demo/i }),
-  ).toBeVisible();
-  await expect(page.getByText(/page not found/i)).toBeVisible();
+  await expect(page.getByRole('link', { name: /side a records, home/i })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: /page not found/i })).toBeVisible();
   expect(errors).toEqual([]);
 });
