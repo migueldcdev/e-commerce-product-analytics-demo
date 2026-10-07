@@ -1,6 +1,7 @@
 import posthog from 'posthog-js';
 import { posthogLogger } from '@/console';
 import { describePostHogEvent } from './describePostHogEvent';
+import { describePostHogEventHelp } from './describePostHogEventHelp';
 
 /** Safe to call before React mounts: the logger keeps early events for the console. */
 export function initPostHog(): void {
@@ -15,7 +16,11 @@ export function initPostHog(): void {
   posthog.init(key, {
     api_host: host,
     before_send: (event) => {
-      if (event) posthogLogger.info(describePostHogEvent(event), event.properties);
+      if (event) {
+        posthogLogger.info(describePostHogEvent(event), event.properties, {
+          help: describePostHogEventHelp(event.event),
+        });
+      }
       return null; // drop the event for now
     },
   });

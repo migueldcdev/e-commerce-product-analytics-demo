@@ -1,6 +1,7 @@
 import posthog, { type CaptureResult, type PostHogConfig } from 'posthog-js';
 import { logger } from '@/console';
 import { describePostHogEvent } from './describePostHogEvent';
+import { describePostHogEventHelp } from './describePostHogEventHelp';
 import { initPostHog } from './posthog';
 
 function initConfig(): Partial<PostHogConfig> {
@@ -63,6 +64,18 @@ describe('initPostHog', () => {
       });
       expect(entries[0].message).toBe('$pageview  /dashboard');
       expect(entries[0].data).toBe(properties);
+    });
+
+    it('before_send attaches the event help when there is one', () => {
+      initPostHog();
+
+      beforeSend()({ event: '$pageview', properties: {} } as unknown as CaptureResult);
+      beforeSend()({ event: '$autocapture', properties: {} } as unknown as CaptureResult);
+
+      const [pageview, autocapture] = logger.getSnapshot().logs;
+      expect(pageview.help).toBe(describePostHogEventHelp('$pageview'));
+      expect(pageview.help).toMatch(/^Pageview: /);
+      expect(autocapture).not.toHaveProperty('help');
     });
 
     it('before_send(null) returns null and logs nothing', () => {
