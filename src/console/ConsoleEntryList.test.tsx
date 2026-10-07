@@ -1,4 +1,4 @@
-import { act, render, screen, within } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ConsoleProvider } from './ConsoleContext';
 import { ConsoleEntryList } from './ConsoleEntryList';
@@ -248,6 +248,94 @@ describe('ConsoleEntryList', () => {
 
       expect(await navigator.clipboard.readText()).toBe(JSON.stringify(data, null, 2));
       expect(within(row).getByText(/copied/i)).toBeInTheDocument();
+    });
+  });
+
+  describe('help column', () => {
+    const HELP = 'Pageview: Fires on each page load or route change.';
+
+    function renderWithHelp() {
+      const logger = createLogger();
+      logger.scope('posthog').info('$pageview  /', PAGEVIEW, { help: HELP });
+      logger.scope('posthog').info('$autocapture  click  button "Buy"', { $event_type: 'click' });
+      renderList(logger);
+      const [pageview, autocapture] = rows();
+      return {
+        pageview,
+        autocapture,
+        help: within(pageview).getByRole('button', { name: 'About $pageview' }),
+      };
+    }
+
+    const tooltip = () => screen.queryByRole('tooltip');
+
+    it('shows the help text on hover', async () => {
+      const user = userEvent.setup();
+      const { help } = renderWithHelp();
+      expect(tooltip()).not.toBeInTheDocument();
+
+      await user.hover(help);
+
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(HELP);
+      expect(help).toHaveAccessibleDescription(HELP);
+    });
+
+    it('shows on keyboard focus and hides with Escape', async () => {
+      const user = userEvent.setup();
+      const { help } = renderWithHelp();
+
+      act(() => help.focus());
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(HELP);
+
+      await user.keyboard('{Escape}');
+      await waitFor(() => expect(tooltip()).not.toBeInTheDocument());
+    });
+
+    it('a click opens it and a second click closes it, for touch screens', async () => {
+      const user = userEvent.setup();
+      const { help } = renderWithHelp();
+
+      await user.click(help);
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(HELP);
+
+      await user.click(help);
+      await waitFor(() => expect(tooltip()).not.toBeInTheDocument());
+    });
+
+    it('stays open after a click when the pointer leaves, until Escape', async () => {
+      const user = userEvent.setup();
+      const { help } = renderWithHelp();
+
+      await user.click(help);
+      await user.unhover(help);
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(HELP);
+
+      await user.keyboard('{Escape}');
+      await waitFor(() => expect(tooltip()).not.toBeInTheDocument());
+    });
+
+    it('using the ? button never opens the row', async () => {
+      const user = userEvent.setup();
+      const { pageview, help } = renderWithHelp();
+
+      await user.click(help);
+
+      expect(rowHeader(pageview)).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('a row without help has no ? button but keeps the column', () => {
+      const { pageview, autocapture } = renderWithHelp();
+
+      expect(within(autocapture).queryByRole('button', { name: /^about/i })).toBeNull();
+      expect(pageview.querySelector('[data-slot="entry-help"]')).not.toBeNull();
+      expect(autocapture.querySelector('[data-slot="entry-help"]')).not.toBeNull();
+    });
+
+    it('keeps the row header text in the 8.1 format', () => {
+      const { pageview } = renderWithHelp();
+      expect(rowHeader(pageview)).toHaveTextContent(
+        /^▸\s*18:04:12\.381\W*INFO\W*posthog\W*\$pageview \/$/,
+      );
     });
   });
 

@@ -1,4 +1,5 @@
 import { memo, useEffect, useState } from 'react';
+import { EntryHelp } from './EntryHelp';
 import { JsonView } from './JsonView';
 import type { LogEntry, LogLevel } from './types';
 
@@ -107,6 +108,10 @@ export const ConsoleEntry = memo(function ConsoleEntry({
   return (
     <li data-testid="console-entry" data-entry-id={entry.id} className="border-b border-border/60">
       <div className="flex items-start">
+        {/* Help column: always present so every row stays aligned. */}
+        <div data-slot="entry-help" className="flex w-6 shrink-0 justify-center pt-px">
+          {entry.help && <EntryHelp label={entry.message.split(/\s/, 1)[0]} help={entry.help} />}
+        </div>
         {expandable ? (
           <button
             type="button"
@@ -133,7 +138,7 @@ export const ConsoleEntry = memo(function ConsoleEntry({
         <div
           id={detailsId}
           tabIndex={0}
-          className="mx-2 mb-1 ml-7 max-h-80 overflow-auto rounded-sm bg-muted/50 p-2 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="mx-2 mb-1 ml-13 max-h-80 overflow-auto rounded-sm bg-muted/50 p-2 outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <JsonView value={entry.data} />
         </div>
