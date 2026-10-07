@@ -1,9 +1,11 @@
 import { expect, test, type Page } from '@playwright/test';
 import { stubPostHog } from './support/posthog.ts';
+import { skipWelcome } from './support/welcome.ts';
 
 // The build has a stub PostHog key; keep its requests off the network.
 test.beforeEach(async ({ page }) => {
   await stubPostHog(page);
+  await skipWelcome(page);
 });
 
 function collectConsoleErrors(page: Page): string[] {

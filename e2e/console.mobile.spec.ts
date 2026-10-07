@@ -8,11 +8,13 @@ import {
   rowHeader,
 } from './support/console.ts';
 import { stubPostHog } from './support/posthog.ts';
+import { skipWelcome } from './support/welcome.ts';
 
 const dialog = (page: Page) => page.getByRole('dialog', { name: 'Console' });
 
 test.beforeEach(async ({ page }) => {
   await stubPostHog(page);
+  await skipWelcome(page);
   await page.goto('/');
 });
 

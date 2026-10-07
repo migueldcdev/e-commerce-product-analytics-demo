@@ -13,11 +13,13 @@ import {
   rowHeader,
 } from './support/console.ts';
 import { stubPostHog, type PostHogStub } from './support/posthog.ts';
+import { skipWelcome } from './support/welcome.ts';
 
 let posthog: PostHogStub;
 
 test.beforeEach(async ({ page }) => {
   posthog = await stubPostHog(page);
+  await skipWelcome(page);
   await page.goto('/');
 });
 

@@ -20,9 +20,11 @@ import {
   TOTAL_RECORDS,
 } from './support/browse.ts';
 import { stubPostHog } from './support/posthog.ts';
+import { skipWelcome } from './support/welcome.ts';
 
 test.beforeEach(async ({ page }) => {
   await stubPostHog(page);
+  await skipWelcome(page);
 });
 
 test.describe('catalog', () => {

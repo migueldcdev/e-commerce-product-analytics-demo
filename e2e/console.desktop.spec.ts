@@ -2,6 +2,7 @@ import { AxeBuilder } from '@axe-core/playwright';
 import { expect, test, type Locator, type Page } from '@playwright/test';
 import { consoleLog } from './support/console.ts';
 import { stubPostHog } from './support/posthog.ts';
+import { skipWelcome } from './support/welcome.ts';
 
 type Box = { x: number; y: number; width: number; height: number };
 
@@ -55,6 +56,7 @@ function overlaps(a: Box, b: Box): boolean {
 
 test.beforeEach(async ({ page }) => {
   await stubPostHog(page);
+  await skipWelcome(page);
   await page.goto('/');
 });
 
