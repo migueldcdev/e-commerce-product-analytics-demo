@@ -268,18 +268,36 @@ test.describe('cart', () => {
     await expect(page.getByTestId('cart-count')).toHaveText('2');
   });
 
+  test('cards count down the units left as they are added', async ({ page }) => {
+    await gotoBrowse(page);
+    const abbeyRoad = card(page, 'Abbey Road');
+
+    await abbeyRoad.getByRole('button', { name: 'Add Abbey Road to cart' }).click();
+    await expect(abbeyRoad).toContainText('Only 1 left');
+
+    await abbeyRoad.getByRole('button', { name: 'Add Abbey Road to cart' }).click();
+    const soldOut = abbeyRoad.getByRole('button', { name: 'Abbey Road: sold out' });
+    await expect(soldOut).toHaveAttribute('aria-disabled', 'true');
+    await expect(abbeyRoad).not.toContainText('left');
+
+    const panel = await openCart(page);
+    await panel.getByRole('button', { name: 'Remove Abbey Road' }).click();
+    await page.keyboard.press('Escape');
+    await expect(abbeyRoad).toContainText('Only 2 left');
+  });
+
   test('cannot exceed stock and rejects sold-out records', async ({ page }) => {
     await gotoBrowse(page);
-    const add = card(page, 'Unknown Pleasures').getByRole('button', {
-      name: 'Add Unknown Pleasures to cart',
-    });
+    const pleasures = card(page, 'Unknown Pleasures');
 
-    await add.click();
-    await add.click();
+    await pleasures.getByRole('button', { name: 'Add Unknown Pleasures to cart' }).click();
+    // aria-disabled keeps the button focusable; Playwright treats it as disabled, so force the click.
+    await pleasures
+      .getByRole('button', { name: 'Unknown Pleasures: sold out' })
+      .click({ force: true });
     await expect(toast(page)).toHaveText('Only 1 of Unknown Pleasures in stock');
     await expect(cartButton(page)).toHaveAccessibleName('Cart, 1 item');
 
-    // aria-disabled keeps the button focusable; Playwright treats it as disabled, so force the click.
     await card(page, 'Rumours')
       .getByRole('button', { name: 'Rumours: sold out' })
       .click({ force: true });

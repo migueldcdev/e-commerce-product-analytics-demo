@@ -46,7 +46,7 @@ function countActive(state: BrowseState): number {
 /** The browse page: search, filters, sort and the product grid. */
 export function Home() {
   const catalog = useCatalog();
-  const { addToCart: add } = useCart();
+  const { items, addToCart: add } = useCart();
   const { toast } = useToast();
   const [state, update] = useBrowseState();
 
@@ -54,6 +54,10 @@ export function Home() {
   const genres = useMemo(() => genresOf(records), [records]);
   const results = useMemo(() => applyBrowse(records, state), [records, state]);
   const active = hasActiveFilters(state);
+  const inCart = useMemo(
+    () => new Map(items.map((item) => [item.recordId, item.quantity])),
+    [items],
+  );
 
   const addToCart = useCallback(
     (recordId: string) => toast(addMessage(add(recordId))),
@@ -133,7 +137,11 @@ export function Home() {
               <ul aria-label="Records" className={GRID}>
                 {results.map((record) => (
                   <li key={record.id}>
-                    <ProductCard record={record} addToCart={addToCart} />
+                    <ProductCard
+                      record={record}
+                      available={record.units - (inCart.get(record.id) ?? 0)}
+                      addToCart={addToCart}
+                    />
                   </li>
                 ))}
               </ul>
