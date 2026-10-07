@@ -11,6 +11,13 @@ vi.mock('posthog-js', () => ({
   },
 }));
 
+// jsdom has no ResizeObserver; Radix popovers and tooltips measure with it.
+globalThis.ResizeObserver ??= class {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
+
 // jsdom has no matchMedia; every test starts on a 1280x800 desktop viewport.
 installMatchMedia();
 resetViewport();
