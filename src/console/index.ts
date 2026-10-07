@@ -5,6 +5,7 @@ export type {
   ConsoleContextValue,
   LogEntry,
   LogLevel,
+  LogOptions,
   LogSnapshot,
   LogSource,
   Logger,

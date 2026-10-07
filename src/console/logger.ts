@@ -1,6 +1,7 @@
 import type {
   LogEntry,
   LogLevel,
+  LogOptions,
   LogSnapshot,
   LogSource,
   Logger,
@@ -45,7 +46,13 @@ export function createLogger({
     }
   }
 
-  function log(level: LogLevel, message: string, data?: unknown, source: LogSource = 'app') {
+  function log(
+    level: LogLevel,
+    message: string,
+    data?: unknown,
+    source: LogSource = 'app',
+    opts?: LogOptions,
+  ) {
     try {
       const entry: LogEntry = {
         id: String(++counter),
@@ -55,6 +62,7 @@ export function createLogger({
         message,
       };
       if (data !== undefined) entry.data = data;
+      if (opts?.help) entry.help = opts.help;
       snapshot = { logs: append(snapshot.logs, entry), metrics: snapshot.metrics };
     } catch {
       return;
@@ -82,10 +90,10 @@ export function createLogger({
 
   function scope(source: LogSource): ScopedLogger {
     return {
-      debug: (message, data) => log('debug', message, data, source),
-      info: (message, data) => log('info', message, data, source),
-      warn: (message, data) => log('warn', message, data, source),
-      error: (message, data) => log('error', message, data, source),
+      debug: (message, data, opts) => log('debug', message, data, source, opts),
+      info: (message, data, opts) => log('info', message, data, source, opts),
+      warn: (message, data, opts) => log('warn', message, data, source, opts),
+      error: (message, data, opts) => log('error', message, data, source, opts),
       metric: (name, value, opts) => metric(source, name, value, opts),
     };
   }

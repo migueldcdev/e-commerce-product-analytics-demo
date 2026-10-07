@@ -10,6 +10,12 @@ export interface LogEntry {
   message: string;
   /** Full payload shown when the row is opened. */
   data?: unknown;
+  /** Short explanation shown in the row's ? tooltip. */
+  help?: string;
+}
+
+export interface LogOptions {
+  help?: string;
 }
 
 export interface MetricEntry {
@@ -33,16 +39,22 @@ export interface MetricOptions {
 }
 
 export interface ScopedLogger {
-  debug(message: string, data?: unknown): void;
-  info(message: string, data?: unknown): void;
-  warn(message: string, data?: unknown): void;
-  error(message: string, data?: unknown): void;
+  debug(message: string, data?: unknown, opts?: LogOptions): void;
+  info(message: string, data?: unknown, opts?: LogOptions): void;
+  warn(message: string, data?: unknown, opts?: LogOptions): void;
+  error(message: string, data?: unknown, opts?: LogOptions): void;
   metric(name: string, value: number, opts?: MetricOptions): void;
 }
 
 /** The level shortcuts and metric() use source 'app'. */
 export interface Logger extends ScopedLogger {
-  log(level: LogLevel, message: string, data?: unknown, source?: LogSource): void;
+  log(
+    level: LogLevel,
+    message: string,
+    data?: unknown,
+    source?: LogSource,
+    opts?: LogOptions,
+  ): void;
   scope(source: LogSource): ScopedLogger;
   clear(): void;
   getSnapshot(this: void): LogSnapshot;

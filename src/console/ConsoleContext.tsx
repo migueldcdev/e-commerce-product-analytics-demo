@@ -55,10 +55,10 @@ export function ConsoleProvider({
       logs: snapshot.logs,
       metrics: snapshot.metrics,
       logger,
-      debug: (message, data) => logger.debug(message, data),
-      info: (message, data) => logger.info(message, data),
-      warn: (message, data) => logger.warn(message, data),
-      error: (message, data) => logger.error(message, data),
+      debug: (message, data, opts) => logger.debug(message, data, opts),
+      info: (message, data, opts) => logger.info(message, data, opts),
+      warn: (message, data, opts) => logger.warn(message, data, opts),
+      error: (message, data, opts) => logger.error(message, data, opts),
       metric: (name, value, opts) => logger.metric(name, value, opts),
       clear: () => {
         setExpanded(new Set());

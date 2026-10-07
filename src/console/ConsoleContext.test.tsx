@@ -84,6 +84,16 @@ describe('useConsole', () => {
     expect(result.current.metrics).toHaveLength(0);
   });
 
+  it('logging methods pass help through', () => {
+    const { result } = renderHook(() => useConsole(), { wrapper });
+
+    act(() => {
+      result.current.info('with help', { x: 1 }, { help: 'Explains it' });
+    });
+
+    expect(result.current.logs[0]).toMatchObject({ message: 'with help', help: 'Explains it' });
+  });
+
   it('accepts an injected logger for isolated tests', () => {
     const isolated = createLogger();
     isolated.info('isolated');

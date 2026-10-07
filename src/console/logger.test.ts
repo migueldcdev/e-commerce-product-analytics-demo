@@ -98,6 +98,23 @@ describe('createLogger', () => {
       expect(second.timestamp).toBe(new Date(2026, 9, 7, 18, 4, 15, 902).getTime());
     });
 
+    it('stores help when passed, and leaves it out otherwise', () => {
+      const logger = createLogger();
+
+      logger.info('a', undefined, { help: 'Explains a' });
+      logger.scope('posthog').warn('b', { x: 1 }, { help: 'Explains b' });
+      logger.log('error', 'c', undefined, 'app', { help: 'Explains c' });
+      logger.debug('d', { x: 1 });
+      logger.info('e', undefined, { help: '' });
+      logger.info('f', undefined, {});
+
+      const [a, b, c, d, e, f] = logger.getSnapshot().logs;
+      expect(a).toMatchObject({ message: 'a', help: 'Explains a' });
+      expect(b).toMatchObject({ message: 'b', source: 'posthog', help: 'Explains b' });
+      expect(c).toMatchObject({ message: 'c', level: 'error', help: 'Explains c' });
+      for (const entry of [d, e, f]) expect(entry).not.toHaveProperty('help');
+    });
+
     it('stores data by reference without copying it', () => {
       const logger = createLogger();
       const data = { nested: { value: 1 } };
