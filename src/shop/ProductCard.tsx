@@ -6,6 +6,8 @@ import { EYEBROW, FOCUS_RING } from './styles';
 
 export interface ProductCardProps {
   record: VinylRecord;
+  /** Units still available to add: stock on hand minus what is already in the cart. */
+  available: number;
   addToCart: (recordId: string) => void;
 }
 
@@ -13,10 +15,10 @@ export interface ProductCardProps {
  * Placeholder card until the Product Card spec lands. It renders what the browse page needs
  * and calls addToCart; the page owns stock rules and feedback.
  */
-export function ProductCard({ record, addToCart }: ProductCardProps) {
+export function ProductCard({ record, available, addToCart }: ProductCardProps) {
   const titleId = useId();
-  const soldOut = record.units <= 0;
-  const lowStock = !soldOut && record.units <= LOW_STOCK_MAX;
+  const soldOut = available <= 0;
+  const lowStock = !soldOut && available <= LOW_STOCK_MAX;
 
   return (
     <article aria-labelledby={titleId} data-testid="product-card" className="flex flex-col">
@@ -68,7 +70,7 @@ export function ProductCard({ record, addToCart }: ProductCardProps) {
         >
           {soldOut ? 'Sold out' : 'Add to cart'}
         </button>
-        {lowStock && <p className="text-xs text-orange-800">Only {record.units} left</p>}
+        {lowStock && <p className="text-xs text-orange-800">Only {available} left</p>}
       </div>
     </article>
   );
