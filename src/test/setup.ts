@@ -26,4 +26,5 @@ afterEach(() => {
   cleanup();
   resetViewport();
   localStorage.clear();
+  sessionStorage.clear();
 });
