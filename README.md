@@ -61,17 +61,26 @@ Without `VITE_POSTHOG_KEY` the app logs one warning and skips analytics.
 ```text
 .github/workflows/ci.yml       # quality, unit, e2e, ci-ok
 .mcp.json                      # shadcn MCP server for coding agents
-e2e/smoke.spec.ts              # Playwright tests
+e2e/                           # Playwright tests (*.desktop / *.mobile run on one project)
+  browse*.spec.ts              # browse page: search, filters, sort, URL, states, cart, a11y
+public/
+  assets/                      # record covers
+  data/records.json            # the 25-record demo catalog, fetched at runtime
 src/
+  catalog/                     # record types, search/filter/sort + URL params (pure)
+  shop/                        # browse page UI: header search, filters, card, cart panel
   components/ui/               # shadcn components (generated, committed)
   context/                     # React contexts — one Provider + hook per file
     DemoSettingsContext.tsx    # persona, device, flag overrides
+    CatalogContext.tsx         # loads data/records.json, loading/error/retry
+    CartContext.tsx            # in-memory cart with stock limits
+    ToastContext.tsx           # one aria-live toast at a time
     demoSettings.ts            # context object, types, defaults
   lib/posthog.ts               # PostHog init
   lib/utils.ts                 # shadcn cn() helper
   routes/                      # one component per route
-    RootLayout.tsx             # project name header + <Outlet />
-    Home.tsx
+    RootLayout.tsx             # store header (search, cart) + <Outlet />
+    Home.tsx                   # browse page
     NotFound.tsx
   router.tsx                   # route table + createBrowserRouter
   App.tsx  main.tsx  index.css

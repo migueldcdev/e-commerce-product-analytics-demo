@@ -27,6 +27,23 @@ async function box(locator: Locator): Promise<Box> {
   return result;
 }
 
+/** The part of an element its scrolling ancestors leave on screen. */
+async function visibleBox(locator: Locator): Promise<Box> {
+  return locator.evaluate((el) => {
+    let { top, bottom, left, right } = el.getBoundingClientRect();
+    for (let p = el.parentElement; p; p = p.parentElement) {
+      const style = getComputedStyle(p);
+      if (!/auto|scroll|hidden/.test(style.overflowX + style.overflowY)) continue;
+      const clip = p.getBoundingClientRect();
+      top = Math.max(top, clip.top);
+      bottom = Math.min(bottom, clip.bottom);
+      left = Math.max(left, clip.left);
+      right = Math.min(right, clip.right);
+    }
+    return { x: left, y: top, width: right - left, height: bottom - top };
+  });
+}
+
 function overlaps(a: Box, b: Box): boolean {
   return (
     a.x < b.x + b.width - 1 &&
@@ -95,8 +112,9 @@ for (const side of ['left', 'right', 'top', 'bottom'] as const) {
       expect(p.width).toBeCloseTo(viewport.width, 0);
     }
 
-    const header = await box(page.getByRole('banner'));
-    const main = await box(page.getByRole('main'));
+    // The app scrolls inside its pane, so compare what is on screen.
+    const header = await visibleBox(page.getByRole('banner'));
+    const main = await visibleBox(page.getByRole('main'));
     expect(overlaps(p, header)).toBe(false);
     expect(overlaps(p, main)).toBe(false);
     await expect(page.getByRole('heading', { level: 1 })).toBeInViewport();
